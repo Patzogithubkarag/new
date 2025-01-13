@@ -12,6 +12,17 @@ const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+// Function to fetch Bybit server time
+async function getServerTime() {
+  try {
+    const response = await axios.get(`${baseUrl}/v2/public/time`);
+    return response.data.result.server_time;
+  } catch (error) {
+    console.error("Error fetching server time:", error.message);
+    return null;
+  }
+}
+
 // Function to generate the API signature
 function generateSignature(params, apiSecret) {
   const queryString = Object.keys(params)
@@ -25,11 +36,17 @@ function generateSignature(params, apiSecret) {
 // Define a function to check the Bybit API
 async function checkBybitAPI() {
   try {
-    const timestamp = Math.floor(Date.now() / 1000); // Convert to seconds
+    const serverTime = await getServerTime(); // Get the server's timestamp
+    if (!serverTime) {
+      return { message: 'Error fetching server time', success: false };
+    }
+
+    const timestamp = serverTime; // Use server time as your req_timestamp
     const params = {
       api_key: apiKey,
       timestamp: timestamp,
       accountType: 'UNIFIED',
+      recv_window: 5000, // Optional: to allow a 5-second window for request validation
     };
 
     // Add the signature to the request
