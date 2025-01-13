@@ -25,7 +25,7 @@ function generateSignature(params, apiSecret) {
 // Define a function to check the Bybit API
 async function checkBybitAPI() {
   try {
-    const timestamp = Math.floor(Date.now() / 1000); // Convert to seconds
+    const timestamp = getUTCimestamp(); // Convert to seconds
     const params = {
       api_key: apiKey,
       timestamp: timestamp,
