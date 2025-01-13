@@ -1,42 +1,44 @@
 const express = require('express');
-const axios = require('axio');
-
+const axios = require('axios');
 const app = express();
 
-// MEXC API endpoint for the VRA/USDT spot market
-const apiUrl = 'https://api.mexc.com/api/v3/ticker/24hr?symbol=VRAUSDT';
+// Bybit API Configuration
+const apiKey = '7qrDVFxskTxzsUYf10';
+const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
+const baseUrl = 'https://api.bybit.com/'; // Replace with the actual base URL
+
+// Serve the EJS template
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// Function to fetch spot price
-async function getVraSpotPrice() {
+// Define a simple function to check the Bybit API
+async function checkBybitAPI() {
   try {
-    const response = await axios.get(apiUrl);
-    return {
-      price: response.data.lastPrice,
-      volume: response.data.volume,
-      high: response.data.highPrice,
-      low: response.data.lowPrice
+    const params = {
+      api_key: apiKey,
+      timestamp: Date.now(),
+      accountType: 'UNIFIED',
     };
+
+    const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
+    if (response.status === 200 && response.data.retCode === 0) {
+      return { message: 'Bybit API connection successful', success: true };
+    } else {
+      return { message: 'Bybit API connection failed', success: false };
+    }
   } catch (error) {
-    console.error('Error fetching VRA/USDT data:', error);
-    return null;
+    console.error('Error connecting to Bybit API:', error.message);
+    return { message: 'Error connecting to Bybit API', success: false };
   }
 }
 
-// Serve the VRA spot price on a webpage
+// Main route to test the API and return JSON
 app.get('/', async (req, res) => {
-  const priceData = await getVraSpotPrice();
-  
-  if (priceData) {
-    // Render the EJS file and pass the data
-    res.render('index', { priceData });
-  } else {
-    res.render('error', { message: 'Error fetching data from MEXC' });
-  }
+  const apiStatus = await checkBybitAPI();
+  res.json(apiStatus); // Return the status as JSON
 });
 
-// Start the server on port 3000
+// Start the server
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
