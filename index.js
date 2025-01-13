@@ -5,6 +5,8 @@ const app = express();
 
 // MEXC API endpoint for the VRA/USDT spot market
 const apiUrl = 'https://api.mexc.com/api/v3/ticker/24hr?symbol=VRAUSDT';
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 // Function to fetch spot price
 async function getVraSpotPrice() {
@@ -27,21 +29,10 @@ app.get('/', async (req, res) => {
   const priceData = await getVraSpotPrice();
   
   if (priceData) {
-    // Display the data in HTML format
-    res.send(`
-      <html>
-        <head><title>VRA/USDT Spot Price</title></head>
-        <body>
-          <h1>VRA/USDT Spot Price Information</h1>
-          <p><strong>Current Price:</strong> ${priceData.price}</p>
-          <p><strong>24h Volume:</strong> ${priceData.volume}</p>
-          <p><strong>24h High:</strong> ${priceData.high}</p>
-          <p><strong>24h Low:</strong> ${priceData.low}</p>
-        </body>
-      </html>
-    `);
+    // Render the EJS file and pass the data
+    res.render('index', { priceData });
   } else {
-    res.send('<h1>Error fetching data from MEXC</h1>');
+    res.render('error', { message: 'Error fetching data from MEXC' });
   }
 });
 
