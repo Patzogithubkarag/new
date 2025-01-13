@@ -1,17 +1,28 @@
 const express = require('express');
 const axios = require('axios');
+const crypto = require('crypto'); // Required for generating the signature
 const app = express();
 
 // Bybit API Configuration
 const apiKey = '7qrDVFxskTxzsUYf10';
 const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
-const baseUrl = 'https://api.bytick.com/'; // Replace with the actual base URL
+const baseUrl = 'https://api.bytick.com'; // Replace with the actual base URL
 
 // Serve the EJS template
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// Define a simple function to check the Bybit API
+// Function to generate the API signature
+function generateSignature(params, apiSecret) {
+  const queryString = Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join('&');
+
+  return crypto.createHmac('sha256', apiSecret).update(queryString).digest('hex');
+}
+
+// Define a function to check the Bybit API
 async function checkBybitAPI() {
   try {
     const params = {
@@ -20,11 +31,17 @@ async function checkBybitAPI() {
       accountType: 'UNIFIED',
     };
 
+    // Add the signature to the request
+    params.sign = generateSignature(params, apiSecret);
+
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
     if (response.status === 200 && response.data.retCode === 0) {
       return { message: 'Bybit API connection successful', success: true };
     } else {
-      return { message: 'Bybit API connection failed', success: false };
+      return { 
+        message: `Bybit API connection failed: ${response.data.retMsg}`, 
+        success: false 
+      };
     }
   } catch (error) {
     console.error('Error connecting to Bybit API:', error.message);
