@@ -12,6 +12,10 @@ const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
+function getUTCimestamp() {
+  return Date.now(); // Returns current timestamp in milliseconds
+}
+
 // Function to generate the API signature
 function generateSignature(params, apiSecret) {
   const queryString = Object.keys(params)
