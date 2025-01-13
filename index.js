@@ -15,7 +15,7 @@ app.set('views', './views');
 // Function to fetch Bybit server time
 async function getServerTime() {
   try {
-    const response = await axios.get(`${baseUrl}/v2/public/time`);
+    const response = await axios.get(`${baseUrl}/v5/public/time`);
     return response.data.result.server_time;
   } catch (error) {
     console.error("Error fetching server time:", error.message);
