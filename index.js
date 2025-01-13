@@ -6,7 +6,7 @@ const app = express();
 // Bybit API Configuration
 const apiKey = '7qrDVFxskTxzsUYf10';
 const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
-const baseUrl = 'https://api.bytick.com'; // Replace with the actual base URL
+const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
 
 // Serve the EJS template
 app.set('view engine', 'ejs');
