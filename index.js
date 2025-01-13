@@ -25,16 +25,19 @@ function generateSignature(params, apiSecret) {
 // Define a function to check the Bybit API
 async function checkBybitAPI() {
   try {
+    const timestamp = Math.floor(Date.now() / 1000); // Convert to seconds
     const params = {
       api_key: apiKey,
-      timestamp: Date.now(),
+      timestamp: timestamp,
       accountType: 'UNIFIED',
     };
 
     // Add the signature to the request
     params.sign = generateSignature(params, apiSecret);
 
+    // Make the API request
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
+
     if (response.status === 200 && response.data.retCode === 0) {
       return { message: 'Bybit API connection successful', success: true };
     } else {
@@ -43,11 +46,18 @@ async function checkBybitAPI() {
         success: false 
       };
     }
-  }  catch (error) {
-  console.error('Error connecting to Bybit API:', error.message);
-  console.error('Error details:', error.response ? error.response.data : error);
-  return { message: 'Error connecting to Bybit API', success: false };
-}
+  } catch (error) {
+    console.error('Error connecting to Bybit API:', error.message);
+
+    // Log the full error details for debugging
+    if (error.response) {
+      console.error('Error details:', error.response.data);
+    } else {
+      console.error('Error details:', error);
+    }
+
+    return { message: 'Error connecting to Bybit API', success: false };
+  }
 }
 
 // Main route to test the API and return JSON
