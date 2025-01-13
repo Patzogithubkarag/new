@@ -43,10 +43,11 @@ async function checkBybitAPI() {
         success: false 
       };
     }
-  } catch (error) {
-    console.error('Error connecting to Bybit API:', error.message);
-    return { message: 'Error connecting to Bybit API', success: false };
-  }
+  } } catch (error) {
+  console.error('Error connecting to Bybit API:', error.message);
+  console.error('Error details:', error.response ? error.response.data : error);
+  return { message: 'Error connecting to Bybit API', success: false };
+}
 }
 
 // Main route to test the API and return JSON
