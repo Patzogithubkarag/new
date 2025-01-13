@@ -6,7 +6,7 @@ const app = express();
 // Bybit API Configuration
 const apiKey = '7qrDVFxskTxzsUYf10';
 const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
-const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
+const baseUrl = 'https://api.bybit.com'; // Correct base URL for v5
 
 // Serve the EJS template
 app.set('view engine', 'ejs');
@@ -15,10 +15,15 @@ app.set('views', './views');
 // Function to fetch Bybit server time
 async function getServerTime() {
   try {
+    console.log("Fetching server time...");
     const response = await axios.get(`${baseUrl}/v5/public/time`);
-    return response.data.result.server_time;
+    console.log('Server time fetched:', response.data);
+    return response.data.result.server_time; // Extract server time from the response
   } catch (error) {
     console.error("Error fetching server time:", error.message);
+    if (error.response) {
+      console.error('Error details:', error.response.data);
+    }
     return null;
   }
 }
@@ -42,6 +47,8 @@ async function checkBybitAPI() {
     }
 
     const timestamp = serverTime; // Use server time as your req_timestamp
+    console.log("Using server timestamp:", timestamp);
+
     const params = {
       api_key: apiKey,
       timestamp: timestamp,
@@ -51,9 +58,11 @@ async function checkBybitAPI() {
 
     // Add the signature to the request
     params.sign = generateSignature(params, apiSecret);
+    console.log("Generated signature:", params.sign);
 
     // Make the API request
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
+    console.log("Bybit API response:", response.data);
 
     if (response.status === 200 && response.data.retCode === 0) {
       return { message: 'Bybit API connection successful', success: true };
