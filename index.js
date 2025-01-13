@@ -12,20 +12,9 @@ const baseUrl = 'https://api.bybit.com'; // Correct base URL for v5
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// Function to fetch Bybit server time
-async function getServerTime() {
-  try {
-    console.log("Fetching server time...");
-    const response = await axios.get(`${baseUrl}/v5/public/time`);
-    console.log('Server time fetched:', response.data);
-    return response.data.result.server_time; // Extract server time from the response
-  } catch (error) {
-    console.error("Error fetching server time:", error.message);
-    if (error.response) {
-      console.error('Error details:', error.response.data);
-    }
-    return null;
-  }
+// Function to get the current UTC timestamp in milliseconds
+function getUTCimestamp() {
+  return Date.now(); // Returns current timestamp in milliseconds
 }
 
 // Function to generate the API signature
@@ -41,13 +30,8 @@ function generateSignature(params, apiSecret) {
 // Define a function to check the Bybit API
 async function checkBybitAPI() {
   try {
-    const serverTime = await getServerTime(); // Get the server's timestamp
-    if (!serverTime) {
-      return { message: 'Error fetching server time', success: false };
-    }
-
-    const timestamp = serverTime; // Use server time as your req_timestamp
-    console.log("Using server timestamp:", timestamp);
+    const timestamp = getUTCimestamp(); // Get the current UTC timestamp in milliseconds
+    console.log("Using UTC timestamp:", timestamp);
 
     const params = {
       api_key: apiKey,
