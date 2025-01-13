@@ -43,7 +43,7 @@ async function checkBybitAPI() {
         success: false 
       };
     }
-  } } catch (error) {
+  }  catch (error) {
   console.error('Error connecting to Bybit API:', error.message);
   console.error('Error details:', error.response ? error.response.data : error);
   return { message: 'Error connecting to Bybit API', success: false };
