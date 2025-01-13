@@ -27,16 +27,17 @@ function generateSignature(params, apiSecret) {
   return crypto.createHmac('sha256', apiSecret).update(queryString).digest('hex');
 }
 
-// Define a function to check the Bybit API
-async function checkBybitAPI() {
+// Define a function to check the Bybit Spot API
+async function checkBybitSpotAPI() {
   try {
     const timestamp = getUTCimestamp(); // Get the current UTC timestamp in milliseconds
     console.log("Using UTC timestamp:", timestamp);
 
+    // Use accountType as 'SPOT' for spot trading data
     const params = {
       api_key: apiKey,
       timestamp: timestamp,
-      accountType: 'UNIFIED',
+      accountType: 'SPOT', // Set accountType to SPOT for spot trade data
       recv_window: 5000, // Optional: to allow a 5-second window for request validation
     };
 
@@ -44,20 +45,20 @@ async function checkBybitAPI() {
     params.sign = generateSignature(params, apiSecret);
     console.log("Generated signature:", params.sign);
 
-    // Make the API request
-    const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
-    console.log("Bybit API response:", response.data);
+    // Make the API request to the Spot Orders endpoint (v5 spot order list)
+    const response = await axios.get(`${baseUrl}/v5/spot/order/list`, { params });
+    console.log("Bybit Spot API response:", response.data);
 
     if (response.status === 200 && response.data.retCode === 0) {
-      return { message: 'Bybit API connection successful', success: true };
+      return { message: 'Bybit Spot API connection successful', success: true };
     } else {
       return { 
-        message: `Bybit API connection failed: ${response.data.retMsg}`, 
+        message: `Bybit Spot API connection failed: ${response.data.retMsg}`, 
         success: false 
       };
     }
   } catch (error) {
-    console.error('Error connecting to Bybit API:', error.message);
+    console.error('Error connecting to Bybit Spot API:', error.message);
 
     // Log the full error details for debugging
     if (error.response) {
@@ -66,13 +67,13 @@ async function checkBybitAPI() {
       console.error('Error details:', error);
     }
 
-    return { message: 'Error connecting to Bybit API', success: false };
+    return { message: 'Error connecting to Bybit Spot API', success: false };
   }
 }
 
-// Main route to test the API and return JSON
+// Main route to test the Spot API and return JSON
 app.get('/', async (req, res) => {
-  const apiStatus = await checkBybitAPI();
+  const apiStatus = await checkBybitSpotAPI();
   res.json(apiStatus); // Return the status as JSON
 });
 
