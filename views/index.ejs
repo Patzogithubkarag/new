@@ -50,7 +50,27 @@
         setInterval(fetchData, 5000); // 1000 ms = 1 second
 
 
-
+document.addEventListener('DOMContentLoaded', () => {
+          const unlockButton = document.getElementById('unlockButton');
+          const codeInput = document.getElementById('codeInput');
+          const content = document.getElementById('content');
+          const errorMessage = document.getElementById('errorMessage');
+          const overlay = document.querySelector('.overlay');
+  
+          const correctCode = "1234"; // Define the correct code here
+  
+          // Handle unlock button click
+          unlockButton.addEventListener('click', () => {
+              const enteredCode = codeInput.value.trim();
+              if (enteredCode === correctCode) {
+                  content.classList.remove('blur'); // Remove blur
+                  errorMessage.textContent = ''; // Clear error message
+                  overlay.style.display = 'none'; // Hide the overlay
+              } else {
+                  errorMessage.textContent = 'Incorrect code. Please try again.';
+              }
+          });
+      });
 
 
 
@@ -60,6 +80,15 @@
     <title>Symbol Display</title>
 </head>
 <body>
+
+ <div class="overlay">
+        <div class="input-container">
+            <input type="text" id="codeInput" placeholder="Enter code" />
+            <button id="unlockButton">Unlock</button>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+<div id="content" class="blur">
     <div class="container">
     <table>
         <tr>
@@ -103,6 +132,7 @@
 </div>
 
 </body>
+<div>
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
