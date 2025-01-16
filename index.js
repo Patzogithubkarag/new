@@ -1,44 +1,53 @@
 const express = require('express');
-const axios = require('axios');
 const crypto = require('crypto');
+const axios = require('axios');
+
 const app = express();
 
-// Bybit API Configuration
 const apiKey = '7qrDVFxskTxzsUYf10';
 const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
-const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
+const baseUrl = 'https://api.bybit.com/'; // Replace with the actual base URL
 
+app.use(express.urlencoded({ extended: true })); // Parses form data
+app.use(express.json()); // Parses JSON data
+
+// Serve the EJS template
 app.set('view engine', 'ejs');
 app.set('views', './views');
-app.use(express.static('public')); // Serve static files like CSS and JS
+app.use(express.static('public'));
 
 function getUTCimestamp() {
   return Date.now();
-}
+};
 
+
+// Generate a signature for the API request
 function generateSignature(params, apiSecret) {
   const queryString = Object.keys(params)
     .sort()
-    .map((key) => `${key}=${params[key]}`)
+    .map(key => `${key}=${params[key]}`)
     .join('&');
 
-  return crypto.createHmac('sha256', apiSecret).update(queryString).digest('hex');
+  return crypto.createHmac('sha256', apiSecret)
+    .update(queryString)
+    .digest('hex');
 }
 
-async function fetchBybitData() {
+// Define a function to fetch data from the API
+async function fetchData() {
+  const timestamp = getUTCimestamp();
+  const params = {
+    api_key: apiKey,
+    timestamp: timestamp,
+    accountType: 'UNIFIED',
+    category: 'linear',
+    symbol: 'VRAUSDT',
+  };
+
+  params.sign = generateSignature(params, apiSecret);
+
+
   try {
-    const timestamp = getUTCimestamp();
-    const params = {
-      api_key: apiKey,
-      timestamp: timestamp,
-      accountType: 'UNIFIED',
-      category: 'linear',
-      symbol: 'VRAUSDT',
-    };
-
-    params.sign = generateSignature(params, apiSecret);
-
-   try {
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
 
     if (response.status === 200 && response.data.retCode === 0) {
@@ -83,7 +92,7 @@ app.get("/", (req, res) => {
 });
 
 app.post('/submit', (req, res) => {
-    
+  
     console.log(inputValue)
 });
 
@@ -92,4 +101,3 @@ app.post('/submit', (req, res) => {
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
-
