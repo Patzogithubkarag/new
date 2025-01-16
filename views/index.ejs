@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data && data.positionValue) {
             const inputValue = parseFloat(inputField.value); // Convert input to number
             if (!isNaN(inputValue)) {
-                displayText.textContent = "$" + inputValue * parseFloat(data.size).toFixed(2);
+                displayText.textContent = "$" + (inputValue - parseFloat(data.avgPrice).toFixed(6)) * parseFloat(data.size).toFixed(2);
                 console.log(data.positionValue) // Update the h1 with the calculated value
             } else {
                 displayText.textContent = "Please enter a valid number"; // Error message for invalid input
