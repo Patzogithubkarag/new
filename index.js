@@ -34,6 +34,8 @@ async function checkBybitAPI() {
       api_key: apiKey,
       timestamp: timestamp,
       accountType: 'UNIFIED',
+         category: 'linear',
+    symbol: 'VRAUSDT',
     };
 
     // Add the signature to the request
