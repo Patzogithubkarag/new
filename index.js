@@ -38,49 +38,58 @@ async function fetchBybitData() {
 
     params.sign = generateSignature(params, apiSecret);
 
+   try {
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
 
     if (response.status === 200 && response.data.retCode === 0) {
-      const positions = response.data.result.list[0]; // Assuming list[0] contains relevant data
+      const data = response.data.result.list[0]; // Get the first item from the list
+      console.log(JSON.stringify(data, null, 2));
+      const value = data.positionValue
       return {
-        symbol: positions.symbol,
-        leverage: positions.leverage,
-        size: positions.size,
-        positionValue: positions.positionValue,
-        avgPrice: positions.entryPrice,
-        liqPrice: positions.liqPrice,
-        positionIM: positions.positionIM,
-        positionMM: positions.positionMM,
-        markPrice: positions.markPrice,
-        unrealisedPnl: positions.unrealisedPnl,
-        curRealisedPnl: positions.cumRealisedPnl,
+        symbol: data.symbol,
+        leverage: data.leverage,
+        size: data.size,
+        positionValue: parseFloat(data.positionValue).toFixed(2),
+        avgPrice: parseFloat(data.avgPrice).toFixed(6),
+        liqPrice: parseFloat(data.liqPrice).toFixed(6),
+        positionIM: parseFloat(data.positionIM).toFixed(4),
+        positionMM: parseFloat(data.positionMM).toFixed(4),
+        markPrice: parseFloat(data.markPrice).toFixed(6),
+        unrealisedPnl: parseFloat(data.unrealisedPnl).toFixed(4),
+        curRealisedPnl: parseFloat(data.curRealisedPnl).toFixed(4),
       };
     } else {
-      console.error(`Error from Bybit API: ${response.data.retMsg}`);
-      return null;
+      throw new Error(`Error: ${response.data.retMsg}`);
     }
   } catch (error) {
-    console.error('Error connecting to Bybit API:', error.message);
-    return null;
+    console.error('Error fetching data from Bybit:', error);
+    throw error;
   }
 }
 
-// Serve the EJS template
-app.get('/', (req, res) => {
-  res.render('index'); // Render the EJS file
-});
-
-// Serve the Bybit data as JSON
+// API route to return the data
 app.get('/api/data', async (req, res) => {
-  const data = await fetchBybitData();
-  if (data) {
-    res.json(data);
-  } else {
-    res.status(500).json({ error: 'Failed to fetch data from Bybit API' });
+  try {
+    const data = await fetchData();
+    res.json(data); // Return the data as JSON
+  } catch (error) {
+    res.status(500).send('Error fetching data');
   }
 });
 
-// Start the server
+// Main route to render the page
+app.get("/", (req, res) => {
+  res.render('index');
+});
+
+app.post('/submit', (req, res) => {
+    
+    console.log(inputValue)
+});
+
+
+
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });
+
