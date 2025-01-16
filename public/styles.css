@@ -220,3 +220,54 @@ h2 {
 
 
 
+
+
+
+   /* Apply blur effect */
+        .blur {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+
+        /* Center the code input box */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent background */
+        }
+
+        .input-container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-container input {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .input-container p {
+            color: red;
+            margin-top: 10px;
+        }
+
+
+
+
+
