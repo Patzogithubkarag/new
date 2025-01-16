@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const crypto = require('crypto'); // Required for generating the signature
+const crypto = require('crypto');
 const app = express();
 
 // Bybit API Configuration
@@ -8,15 +8,14 @@ const apiKey = '7qrDVFxskTxzsUYf10';
 const apiSecret = 'jXTdtshSImrbGNEtaCpXZDoOxuBItGGSOpwN';
 const baseUrl = 'https://api.bybit.com'; // Replace with the actual base URL
 
-// Serve the EJS template
 app.set('view engine', 'ejs');
 app.set('views', './views');
+app.use(express.static('public')); // Serve static files like CSS and JS
 
 function getUTCimestamp() {
-  return Date.now(); // Returns current timestamp in milliseconds
+  return Date.now();
 }
 
-// Function to generate the API signature
 function generateSignature(params, apiSecret) {
   const queryString = Object.keys(params)
     .sort()
@@ -26,50 +25,59 @@ function generateSignature(params, apiSecret) {
   return crypto.createHmac('sha256', apiSecret).update(queryString).digest('hex');
 }
 
-// Define a function to check the Bybit API
-async function checkBybitAPI() {
+async function fetchBybitData() {
   try {
-    const timestamp = getUTCimestamp(); // Convert to seconds
+    const timestamp = getUTCimestamp();
     const params = {
       api_key: apiKey,
       timestamp: timestamp,
       accountType: 'UNIFIED',
-         category: 'linear',
-    symbol: 'VRAUSDT',
+      category: 'linear',
+      symbol: 'VRAUSDT',
     };
 
-    // Add the signature to the request
     params.sign = generateSignature(params, apiSecret);
 
-    // Make the API request
     const response = await axios.get(`${baseUrl}/v5/position/list`, { params });
 
     if (response.status === 200 && response.data.retCode === 0) {
-      return { message: 'Bybit API connection successful', success: true };
-    } else {
-      return { 
-        message: `Bybit API connection failed: ${response.data.retMsg}`, 
-        success: false 
+      const positions = response.data.result.list[0]; // Assuming list[0] contains relevant data
+      return {
+        symbol: positions.symbol,
+        leverage: positions.leverage,
+        size: positions.size,
+        positionValue: positions.positionValue,
+        avgPrice: positions.entryPrice,
+        liqPrice: positions.liqPrice,
+        positionIM: positions.positionIM,
+        positionMM: positions.positionMM,
+        markPrice: positions.markPrice,
+        unrealisedPnl: positions.unrealisedPnl,
+        curRealisedPnl: positions.cumRealisedPnl,
       };
+    } else {
+      console.error(`Error from Bybit API: ${response.data.retMsg}`);
+      return null;
     }
   } catch (error) {
     console.error('Error connecting to Bybit API:', error.message);
-
-    // Log the full error details for debugging
-    if (error.response) {
-      console.error('Error details:', error.response.data);
-    } else {
-      console.error('Error details:', error);
-    }
-
-    return { message: 'Error connecting to Bybit API', success: false };
+    return null;
   }
 }
 
-// Main route to test the API and return JSON
-app.get('/', async (req, res) => {
-  const apiStatus = await checkBybitAPI();
-  res.json(apiStatus); // Return the status as JSON
+// Serve the EJS template
+app.get('/', (req, res) => {
+  res.render('index'); // Render the EJS file
+});
+
+// Serve the Bybit data as JSON
+app.get('/api/data', async (req, res) => {
+  const data = await fetchBybitData();
+  if (data) {
+    res.json(data);
+  } else {
+    res.status(500).json({ error: 'Failed to fetch data from Bybit API' });
+  }
 });
 
 // Start the server
